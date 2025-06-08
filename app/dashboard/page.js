@@ -1,7 +1,9 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-
+import { Sidebar } from '../components/sidebar/sidebar'
+import { MainCenterArea } from '../components/mainCenterArea/mainCenterArea'
+import styles from "./dashboard.module.css"
 export default function DashboardPage() {
   const router = useRouter()
 
@@ -11,11 +13,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
+    <div className={styles.dashboard}>
+     <MainCenterArea/>
       <h1>Dashboard</h1>
       <p>Witaj, użytkowniku!</p>
       <button onClick={handleLogout}>Wyloguj</button>
-    
+    <Sidebar/>
 
     {/* ProfileCard */}
       <div>

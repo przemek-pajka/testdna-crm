@@ -1,0 +1,25 @@
+.sidebar {
+    background-color: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    padding: 20px;
+    color: #000;
+    box-shadow: 0 0.125rem 0.5rem 0 rgba(47, 43, 61, 0.12);;
+}
+.servicesListSidebar {
+    list-style-type: circle;
+    margin: 40px 0px;
+}
+.active {
+    background-color: #7367f0;
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+}
+@media screen and (min-width: 1024px) {
+    .sidebar { 
+        width: 260px;
+    }
+}

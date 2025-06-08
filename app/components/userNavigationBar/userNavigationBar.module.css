@@ -1,0 +1,10 @@
+.userNavigationBar {
+    width: 100%;
+    background: #fff;
+    margin: 40px 0px;
+    padding: 0px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

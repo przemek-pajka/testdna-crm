@@ -1,0 +1,11 @@
+.card {
+    background-color: #fff;
+    padding: 20px;
+    max-width: max-content;
+    border-radius: 10px;
+    height: 300px;
+}
+
+.cardDate {
+    color: #2f2b3d;
+}
