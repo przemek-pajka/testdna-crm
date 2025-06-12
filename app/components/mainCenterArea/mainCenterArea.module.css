@@ -1,5 +1,5 @@
 .mainCenterArea {
-    width: 1392px;
+    width: calc(1392px - 260px);
     margin: 0 auto;
     top: 20px;
     position: relative;

@@ -22,14 +22,13 @@ body {
   color: var(--foreground);
   background: var(--background);
   background: #eee;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
 }
 
 a {
@@ -40,6 +39,38 @@ a {
 
 .cardDate {
   color: #838383;
+  font-size: 13px;
+}
+
+.circ {
+    display: inline-block;
+    background: #000;
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+}
+.circ-orders {
+  background-color: #5c6dff;
+}
+.circ-appointments {
+  background-color: #c8e6c9;
+}
+
+.small-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #ececec;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.small-box__amount {
+  font-weight: 700;
+  font-size: 18px;
+}
+.small-box__description {
+  font-size: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
