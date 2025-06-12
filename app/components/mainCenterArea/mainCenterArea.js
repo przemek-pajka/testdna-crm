@@ -2,6 +2,7 @@ const { UserNavigationBar } = require("../userNavigationBar/userNavigationBar")
 import MiniBar from "../miniBar/miniBar"
 import { Card } from "../card/card"
 import styles from "./mainCenterArea.module.css"
+import MarketingReport from "../marketingReport/marketingReport";
 
   const lastWeek = [38, 52, 14, 30, 46, 22, 60];
 
@@ -38,27 +39,7 @@ export const MainCenterArea = () => (
         </Card>
 
 
-        <Card classes="mt-8">
-           <div className="font-bold">Raport marketingowy</div>
-           <div className="flex gap-5 mt-5">
-                <div className="small-box">
-                    <div className="small-box__amount">32</div>
-                    <div className="small-box__description">Liczba zamówień</div>
-                </div>
-                  <div className="small-box">
-                    <div className="small-box__amount">10</div>
-                    <div className="small-box__description">Liczba formularzy</div>
-                </div>
-                  <div className="small-box">
-                    <div className="small-box__amount">9 400</div>
-                    <div className="small-box__description">Suma PLN</div>
-                </div>
-                  <div className="small-box">
-                    <div className="small-box__amount">293 zł</div>
-                    <div className="small-box__description">Średnia wartość zamówienia</div>
-                </div>
-           </div>
-        </Card>
+       <MarketingReport classes="mt-10"/>
 
     </div>  
 )
