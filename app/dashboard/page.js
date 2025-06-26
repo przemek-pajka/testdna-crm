@@ -14,10 +14,7 @@ export default function DashboardPage() {
 
   return (
     <div className={styles.dashboard}>
-     <MainCenterArea/>
-      <h1>Dashboard</h1>
-      <p>Witaj, użytkowniku!</p>
-      <button onClick={handleLogout}>Wyloguj</button>
+    <MainCenterArea/>
     <Sidebar/>
 
     {/* ProfileCard */}
