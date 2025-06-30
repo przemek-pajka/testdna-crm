@@ -1,7 +1,6 @@
 .mainCenterArea {
-    width: calc(1392px - 260px);
-    margin: 0 auto;
-    top: 20px;
+    width: calc(100% - 260px);
     position: relative;
-    left: 100px;
+    left: 260px;
+    padding: 40px;
 }
