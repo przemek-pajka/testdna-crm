@@ -61,7 +61,7 @@ export default function MiniBar({
       /* TŁO */
       {
         label: "Umówienia formularze",
-        data: shadowValues,
+        data: mainValues,
         backgroundColor: bgColor,
         barPercentage: 0.58,
         categoryPercentage: 1.0,
@@ -70,7 +70,7 @@ export default function MiniBar({
       /* GŁÓWNE SŁUPKI */
       {
         label: "Zamówienia",
-        data: mainValues,
+        data: shadowValues,
         backgroundColor: barColor,
         barPercentage: 0.58,
         categoryPercentage: 1.0,
