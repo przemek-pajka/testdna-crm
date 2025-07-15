@@ -7,72 +7,57 @@ import {
   Tooltip,
 } from "chart.js";
 
-// Rejestracja wymaganych modułów Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
-// Import <Bar> tylko po stronie klienta (Next.js)
-const Bar = dynamic(
-  () => import("react-chartjs-2").then((m) => m.Bar),
-  { ssr: false }
-);
+const Bar = dynamic(() => import("react-chartjs-2").then((m) => m.Bar), {
+  ssr: false,
+});
 
 /**
- * MiniBar – wykres słupkowy z DWOMA seriami:
- *   • tło (bgData / bgColor)
- *   • główne słupki (data / barColor)
+ * MiniBar – wykres słupkowy z DWIEMA seriami: zamówienia + wizyty
  *
  * Props
- * ────────────────────────────────────────────────
- *  data      – wartości główne (wierzchnie słupki)
- *  bgData    – wartości tła (opcjonalnie; fallback ≈70 % głównych)
- *  barColor  – kolor głównych słupków (domyślnie fiolet #5c6dff)
- *  bgColor   – kolor tła (domyślnie szary #e5e5e5)
- *  labels    – etykiety osi X (domyślnie "Pn–Nd")
- *  width     – szerokość canvasa w px (domyślnie 250)
- *  height    – wysokość canvasa w px (domyślnie 100)
+ * ─────────────────────────────────────────────────────────────
+ *  orders        – tablica liczb „Zamówienia”  (wymagane)
+ *  visits        – tablica liczb „Umówienia”   (wymagane)
+ *  ordersColor   – kolor słupków zamówień      (default #5c6dff)
+ *  visitsColor   – kolor słupków wizyt         (default #26a69a)
+ *  labels        – etykiety osi X (default "Pn–Nd")
+ *  width / height – rozmiar canvasa
+ *  stacked       – czy serię rysować „stacked” (default false)
  */
 export default function MiniBar({
-  data,
-  bgData,
-  barColor = "#5c6dff",
-  bgColor = "#e5e5e5",
+  orders,
+  visits,
+  ordersColor = "#5c6dff",
+  visitsColor = "#26a69a",
   labels,
   width = 250,
   height = 100,
+  stacked = false,
 }) {
-  /* ─────────── Dane główne (foreground) ─────────── */
-  const mainValues = data ?? [38, 52, 14, 30, 46, 22, 60];
-
-  /* ─────────── Dane tła (background) ─────────── */
-  const autoBg = mainValues.map((v) =>
-    // ~70 % wartości + losowa fluktuacja (±5)
-    Math.max(4, Math.round(v * 0.7 + (Math.random() * 10 - 5)))
-  );
-  const shadowValues = (bgData ?? autoBg).slice(0, mainValues.length);
-
-  /* ─────────── Etykiety X ─────────── */
   const defaultLabels = ["Pn", "Wt", "Śr", "Czw", "Pt", "Sb", "Nd"];
-  const xLabels = (labels ?? defaultLabels).slice(0, mainValues.length);
+  const xLabels = (labels ?? defaultLabels).slice(
+    0,
+    Math.max(orders?.length ?? 0, visits?.length ?? 0)
+  );
 
-  /* ─────────── Konfiguracja Chart.js ─────────── */
   const chartData = {
     labels: xLabels,
     datasets: [
-      /* TŁO */
       {
-        label: "Umówienia formularze",
-        data: mainValues,
-        backgroundColor: bgColor,
-        barPercentage: 0.58,
+        label: "Zamówienia",
+        data: orders,
+        backgroundColor: ordersColor,
+        barPercentage: 0.48,
         categoryPercentage: 1.0,
         borderRadius: 4,
       },
-      /* GŁÓWNE SŁUPKI */
       {
-        label: "Zamówienia",
-        data: shadowValues,
-        backgroundColor: barColor,
-        barPercentage: 0.58,
+        label: "Umówienia",
+        data: visits,
+        backgroundColor: visitsColor,
+        barPercentage: 0.48,
         categoryPercentage: 1.0,
         borderRadius: 4,
       },
@@ -85,27 +70,18 @@ export default function MiniBar({
     layout: { padding: { left: 4, right: 4 } },
     plugins: {
       legend: { display: false },
-      tooltip: {
-        enabled: true, // pokaż tooltip dla obu serii
-        mode: "index", // przy jednym hover – oba punkty
-        intersect: false,
-      },
+      tooltip: { mode: "index", intersect: false },
     },
     scales: {
       x: {
+        stacked,
         offset: true,
         grid: { display: false },
-        ticks: {
-          font: { size: 10 },
-          padding: 4,
-          maxRotation: 0,
-          autoSkip: false,
-        },
+        ticks: { font: { size: 10 }, padding: 4, maxRotation: 0 },
       },
-      y: { display: false, grid: { display: false } },
+      y: { display: false, stacked, grid: { display: false } },
     },
   };
 
-  /* ─────────── Render wykresu ─────────── */
   return <Bar data={chartData} options={options} width={width} height={height} />;
 }

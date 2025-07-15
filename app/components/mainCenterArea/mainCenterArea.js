@@ -12,27 +12,59 @@ import MarketingReport from "../marketingReport/marketingReport";
 const EMPTY = Array(7).fill(0);
 
 export const MainCenterArea = () => {
-    const [lastWeek, setLastWeek] = useState(EMPTY);
-    const [thisWeek, setThisWeek] = useState(EMPTY);    // ← jeśli będziesz też pokazywał bieżący tydzień
+  const [lastWeekVisits, setLastWeekVisits] = useState(EMPTY);
+  const [thisWeekVisits, setThisWeekVisits] = useState(EMPTY);
 
-    useEffect(() => {
-    (async () => {
+  const [lastWeekOrders, setLastWeekOrders] = useState(EMPTY);
+  const [thisWeekOrders, setThisWeekOrders] = useState(EMPTY);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
       try {
-        const resLast = await fetch("/api/wizyty/last7", { cache: "no-store" });
-        const resThis = await fetch("/api/wizyty/this7", { cache: "no-store" });
+        const [
+          resLastVisits,
+          resThisVisits,
+          resLastOrders,
+          resThisOrders
+        ] = await Promise.all([
+          fetch("/api/wizyty/last7", { cache: "no-store" }),
+          fetch("/api/wizyty/this7", { cache: "no-store" }),
+          fetch("/api/zamowienia/last7", { cache: "no-store" }),
+          fetch("/api/zamowienia/this7", { cache: "no-store" })
+        ]);
 
-        if (!resLast.ok || !resThis.ok) throw new Error("Błąd API");
+        if (
+          !resLastVisits.ok ||
+          !resThisVisits.ok ||
+          !resLastOrders.ok ||
+          !resThisOrders.ok
+        ) {
+          throw new Error("Błąd API podczas pobierania liczników");
+        }
 
-        const last = await resLast.json();
-        const current = await resThis.json();
+        const [
+          lastVisitsCount,
+          thisVisitsCount,
+          lastOrdersCount,
+          thisOrdersCount
+        ] = await Promise.all([
+          resLastVisits.json(),
+          resThisVisits.json(),
+          resLastOrders.json(),
+          resThisOrders.json()
+        ]);
 
-        setLastWeek(last);
-        setThisWeek(current);
+        setLastWeekVisits(lastVisitsCount);
+        setThisWeekVisits(thisVisitsCount);
+        setLastWeekOrders(lastOrdersCount);
+        setThisWeekOrders(thisOrdersCount);
 
       } catch (err) {
-        console.error(err);
+        console.error("Błąd pobierania danych:", err);
       }
-    })();
+    };
+
+    fetchCounts();
   }, []);
   
 return(
@@ -43,12 +75,16 @@ return(
                 <span className="font-bold">Zamówienia</span>
                 <p className="cardDate">Ostatni tydzień</p>
             </div>
-                 <MiniBar data={lastWeek} barColor="#5c6dff"   // fiolet
-  bgColor="#c8e6c9"    />
+                <MiniBar
+  orders={lastWeekOrders}   // prawdziwe dane zamówień
+  visits={lastWeekVisits}   // prawdziwe dane wizyt
+  ordersColor="#5c6dff"
+  visitsColor="#c8e6c9"
+/>
 
         <div className="stats-col text-sm mt-5">
-            <div className="flex items-center"><span className="circ circ-orders"></span>Zamówienia: 125 (Przykładowe)</div>
-            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: {lastWeek.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 30.06)</div>
+            <div className="flex items-center"><span className="circ circ-orders"></span>Zamówienia: { lastWeekOrders.reduce((sum, val) => sum + val, 0)} </div>
+            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: { lastWeekVisits.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 14.07)</div>
         </div>
         </Card>
 
@@ -58,12 +94,16 @@ return(
                 <span className="font-bold">Zamówienia</span>
                 <p className="cardDate">Bieżący tydzień</p>
             </div>
-                 <MiniBar data={thisWeek} barColor="#5c6dff"   // fiolet
-  bgColor="#c8e6c9"    />
+               <MiniBar
+  orders={thisWeekOrders}
+  visits={thisWeekVisits}
+  ordersColor="#5c6dff"
+  visitsColor="#c8e6c9"
+/>
 
         <div className="stats-col text-sm mt-5">
-            <div className="flex items-center"><span className="circ circ-orders"></span>Zamówienia: 153 (Przykładowe)</div>
-            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: {thisWeek.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 30.06)</div>
+            <div className="flex items-center"><span className="circ circ-orders"></span>Zamówienia: { thisWeekOrders.reduce((sum, val) => sum + val, 0)} </div>
+            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: {thisWeekVisits.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 14.07)</div>
         </div>
         </Card>
 
