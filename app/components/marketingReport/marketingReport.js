@@ -1,37 +1,75 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
-import { Card } from "../card/card";
-import dynamic from "next/dynamic";
-import MiniBar from "../miniBar/miniBar";
-import "chart.js/auto"; // pie chart
+"use client";
 
-// Lazy‑load Pie from react-chartjs-2
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { Card } from "../card/card";
+import MiniBar from "../miniBar/miniBar"; // wersja z propsami {orders, visits,...}
+import "chart.js/auto"; // Pie chart
+
+// Lazy-load Pie from react-chartjs-2
 const Pie = dynamic(() => import("react-chartjs-2").then((m) => m.Pie), {
   ssr: false,
 });
 
 /**
- * MarketingReport component
- * – statystyki zamówień / formularzy
- * – wykresy (Pie + MiniBar)
- * – tabela ostatnich zamówień
- * – picker zakresu dat (start → end)
+ * MarketingReport
+ *  • zakres dat (start → end)
+ *  • pobiera zagregowane statystyki z /api/statystyki
+ *  • kafle: zamówienia, formularze, suma PLN, średnia
+ *  • wykresy (Pie + MiniBar demo/mocks — łatwo podmienić na dane z API)
+ *  • tabela ostatnich zamówień (demo/mocks)
  */
 export default function MarketingReport({ classes = "" }) {
-  /**
-   * Zakres dat – domyślnie ostatnie 12 dni czerwca 2025.
-   * W przyszłości dateRange może służyć do pobierania danych z API.
-   */
+  /* Zakres dat – ustaw dowolne wartości start/end */
   const [dateRange, setDateRange] = useState({
     start: "2025-06-01",
     end: "2025-06-12",
   });
 
-  // Handler, który aktualizuje odpowiedni klucz w state
+  /* Statystyki z API */
+  const [stats, setStats] = useState({
+    wizyty: 0,
+    zamowienia: 0,
+    suma_pln: 0,
+    zamowienia_meta: 0, // traktujemy jako "formularze"
+  });
+
+  /* Pobieraj dane przy każdej zmianie dat */
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const url = `/api/statystyki?start=${dateRange.start}&end=${dateRange.end}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(await res.text());
+        const json = await res.json();
+        setStats({
+          wizyty: json.wizyty ?? 0,
+          zamowienia: json.zamowienia ?? 0,
+          suma_pln: json.suma_pln ?? 0,
+          zamowienia_meta: json.zamowienia_meta ?? 0,
+        });
+      } catch (err) {
+        console.error("Błąd pobierania statystyk:", err);
+      }
+    }
+    fetchStats();
+  }, [dateRange]);
+
+  /* Handlery pól daty */
   const handleDateChange = (key) => (e) =>
     setDateRange((prev) => ({ ...prev, [key]: e.target.value }));
 
-  // ────────── Chart data & options ──────────
+  /* Formatowanie kwoty (proste) */
+  const formatPLN = (v) =>
+    typeof v === "number"
+      ? `${v.toLocaleString("pl-PL", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })} zł`
+      : v;
+
+  /* ── Dane wykresów demo (podmień na dane z API, gdy będą dostępne) ── */
   const portalData = {
     labels: ["Prekoncepcja.pl", "Poroniłam.pl", "Genetyczne.pl", "Inne"],
     datasets: [
@@ -41,15 +79,19 @@ export default function MarketingReport({ classes = "" }) {
       },
     ],
   };
- const badaniaLabels = ["KIR - HLA-C", "Kariotyp", "Trombofilia", "MTHFR"]
-
   const pieOptions = {
     maintainAspectRatio: false,
     plugins: { legend: { position: "bottom" } },
   };
 
-  const typeData = [120, 90, 100, 70];
+  const typeLabels = ["KIR - HLA-C", "Kariotyp", "Trombofilia", "MTHFR"];
+  const typeData = [120, 90, 100, 70]; // demo: liczby zamówień wg typu badania
 
+  /* Jeśli chcesz pokazać tylko jedną serię (zamówienia) w MiniBar,
+     przekaż zero-tablicę jako visits: */
+  const emptyVisits = Array(typeData.length).fill(0);
+
+  /* Demo tabela zamówień */
   const rows = [
     {
       id: 12354,
@@ -95,6 +137,12 @@ export default function MarketingReport({ classes = "" }) {
     },
   ];
 
+  /* Średnia wartość zamówienia */
+  const avg =
+    stats.zamowienia > 0
+      ? `${Math.round(stats.suma_pln / stats.zamowienia)} zł`
+      : "—";
+
   return (
     <Card classes={classes}>
       {/* ── Nagłówek ─────────────────────────────────────────────── */}
@@ -122,10 +170,10 @@ export default function MarketingReport({ classes = "" }) {
       {/* ── Statystyki ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-6">
         {[
-          { value: 32, label: "Liczba zamówień" },
-          { value: 10, label: "Liczba formularzy" },
-          { value: "9 400 zł", label: "Suma PLN" },
-          { value: "293 zł", label: "Średnia wartość zamówienia" },
+          { value: stats.zamowienia, label: "Liczba zamówień" },
+          { value: stats.wizyty, label: "Liczba formularzy" },
+          { value: formatPLN(stats.suma_pln), label: "Suma PLN" },
+          { value: avg, label: "Średnia wartość zamówienia" },
         ].map((s) => (
           <div
             key={s.label}
@@ -148,9 +196,16 @@ export default function MarketingReport({ classes = "" }) {
         {/* MiniBar */}
         <div className="aspect-square relative h-80 p-4 border border-gray-200 rounded-md">
           <h3 className="mb-2 font-medium text-sm">Rozkład wg typu badania</h3>
-          {/* Możesz precyzyjnie kontrolować rozmiar przez propsy width/height */}
-          
-          <MiniBar data={typeData} width={320} height={270} labels={badaniaLabels}/>
+          {/* Demo: jedna seria (zamówienia) → visits = same zera */}
+          <MiniBar
+            orders={typeData}
+            visits={emptyVisits}
+            labels={typeLabels}
+            width={320}
+            height={270}
+            ordersColor="#5c6dff"
+            visitsColor="rgba(0,0,0,0)" // ukryj zieloną serię
+          />
         </div>
       </div>
 
