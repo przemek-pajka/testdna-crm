@@ -56,6 +56,46 @@ export default function MarketingReport({ classes = "" }) {
     fetchStats();
   }, [dateRange]);
 
+    /* ─────────── Lista zamówień do tabeli ─────────── */
+  const [orders, setOrders] = useState([]); // <= NEW
+
+  /* Fetch agregatów */
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const url = `/api/statystyki?start=${dateRange.start}&end=${dateRange.end}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(await res.text());
+        const json = await res.json();
+        setStats({
+          wizyty: json.wizyty ?? 0,
+          zamowienia: json.zamowienia ?? 0,
+          suma_pln: json.suma_pln ?? 0,
+        });
+      } catch (err) {
+        console.error("Błąd pobierania statystyk:", err);
+      }
+    }
+    fetchStats();
+  }, [dateRange]);
+
+   /* Fetch LISTY zamówień */
+  useEffect(() => {
+    async function fetchOrders() {
+      try {
+        const url = `/api/zamowienia?start=${dateRange.start}&end=${dateRange.end}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(await res.text());
+        const json = await res.json(); // expecting array
+        setOrders(json);
+      } catch (err) {
+        console.error("Błąd pobierania zamówień:", err);
+        setOrders([]);
+      }
+    }
+    fetchOrders();
+  }, [dateRange]);
+
   /* Handlery pól daty */
   const handleDateChange = (key) => (e) =>
     setDateRange((prev) => ({ ...prev, [key]: e.target.value }));
@@ -222,7 +262,7 @@ export default function MarketingReport({ classes = "" }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
+            {orders.map((r) => (
               <tr key={r.id} className="border-b last:border-0">
                 <td className="py-2">{r.id}</td>
                 <td>{r.product}</td>
