@@ -32,7 +32,7 @@ const [[{ zamowienia, suma_pln }]] = await db.query(
        COALESCE(SUM(CAST(m.meta_value AS DECIMAL(10,2))),0) AS suma_pln
   FROM zamowienia_woocommerce         z
   LEFT JOIN zamowienia_woocommerce_meta m
-         ON m.post_id = z.ID
+         ON m.order_id = z.ID
         AND m.meta_key = '_order_total'
  WHERE DATE(z.post_date) BETWEEN ? AND ?
    AND z.post_status = 'wc-processing';`,
@@ -46,7 +46,7 @@ const [[{ zamowienia_meta }]] = await db.query(
   `SELECT COUNT(DISTINCT z.ID) AS zamowienia_meta
   FROM zamowienia_woocommerce         z
   JOIN zamowienia_woocommerce_meta    m
-    ON m.post_id = z.ID
+    ON m.order_id = z.ID
    AND m.meta_key = '_formularz'
  WHERE DATE(z.post_date) BETWEEN ? AND ?
    AND z.post_status = 'wc-processing';`,

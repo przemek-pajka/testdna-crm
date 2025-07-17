@@ -88,6 +88,7 @@ export default function MarketingReport({ classes = "" }) {
         if (!res.ok) throw new Error(await res.text());
         const json = await res.json(); // expecting array
         setOrders(json);
+        console.log(orders)
       } catch (err) {
         console.error("Błąd pobierania zamówień:", err);
         setOrders([]);
@@ -130,52 +131,6 @@ export default function MarketingReport({ classes = "" }) {
   /* Jeśli chcesz pokazać tylko jedną serię (zamówienia) w MiniBar,
      przekaż zero-tablicę jako visits: */
   const emptyVisits = Array(typeData.length).fill(0);
-
-  /* Demo tabela zamówień */
-  const rows = [
-    {
-      id: 12354,
-      product: "KIR + HLA C",
-      qty: 1,
-      amount: "300 zł",
-      source: "Zamówienie online",
-    },
-    {
-      id: 12353,
-      product: "Kariotyp",
-      qty: 1,
-      amount: "200 zł",
-      source: "Zamówienie online",
-    },
-    {
-      id: 12352,
-      product: "Trombofilia",
-      qty: 1,
-      amount: "250 zł",
-      source: "Zamówienie online",
-    },
-    {
-      id: 12351,
-      product: "KIR + HLA C",
-      qty: 1,
-      amount: "300 zł",
-      source: "Zamówienie online",
-    },
-    {
-      id: 10012,
-      product: "KIR + HLA C",
-      qty: 1,
-      amount: "—",
-      source: "Formularz",
-    },
-    {
-      id: 10011,
-      product: "Kariotyp",
-      qty: 1,
-      amount: "—",
-      source: "Formularz",
-    },
-  ];
 
   /* Średnia wartość zamówienia */
   const avg =
@@ -262,6 +217,7 @@ export default function MarketingReport({ classes = "" }) {
             </tr>
           </thead>
           <tbody>
+            {console.log(orders)}
             {orders.map((r) => (
               <tr key={r.id} className="border-b last:border-0">
                 <td className="py-2">{r.id}</td>
