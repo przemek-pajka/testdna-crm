@@ -100,21 +100,32 @@ export default function MarketingReport({ classes = "" }) {
 
   /* 1️⃣  Dynamika etykiet + danych  ────────────────────────────── */
 const { barLabels, barData } = useMemo(() => {
-  const map = {};                      // {etykieta: suma_qty}
+  const map = {};
 
   orders.forEach((o) => {
-    const key = o.product?.trim();     // pełna nazwa produktu
-    if (!key) return;
-    const qty = Number(o.qty ?? 1);    // zawsze liczba
-    map[key] = (map[key] ?? 0) + qty;
+    /* 1. rozbij po średniku lub przecinku */
+    const names = o.product
+      ?.split(/[;,]/)
+      .map((t) => t.trim())
+      .filter(Boolean);           // wyrzuć puste
+
+    if (!names?.length) return;
+
+    /* 2. podziel qty równomiernie (lub po 1 – jak wolisz) */
+    const share = Number(o.qty ?? 1) / names.length;
+
+    names.forEach((name) => {
+      map[name] = (map[name] ?? 0) + share;
+    });
   });
 
   const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
   return {
-    barLabels: entries.map(([label]) => label),
-    barData:   entries.map(([_, qty]) => qty),
+    barLabels: entries.map(([l]) => l),
+    barData:   entries.map(([_, q]) => q),
   };
 }, [orders]);
+
 
 
   /* Handlery pól daty */
