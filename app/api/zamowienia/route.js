@@ -17,7 +17,7 @@ export async function GET(request) {
     SELECT z.ID                                            AS id,
 
        /* nazwa produktu z wp_posts */
-       MAX(p.post_title)                               AS product,
+      GROUP_CONCAT( DISTINCT p.post_title ORDER BY p.post_title SEPARATOR '; ' ) AS product,
 
        /* suma ilości wszystkich pozycji */
        SUM(CASE WHEN q.meta_key = '_qty'
@@ -67,12 +67,11 @@ LEFT   JOIN dufo_woocommerce_order_itemmeta  pid
 LEFT   JOIN produkty_testdna                            p
        ON p.ID = pid.meta_value                 -- post_title = nazwa produktu
 
-WHERE  DATE(z.post_date) BETWEEN '2025-05-04' AND '2025-07-14'
-  AND  z.post_status LIKE 'wc-%'
+WHERE  DATE(z.post_date) BETWEEN ? AND ?
+  AND  z.post_status LIKE 'wc-processing%'
 
 GROUP  BY z.ID
-ORDER  BY z.post_date DESC
-LIMIT  50;
+ORDER  BY z.post_date DESC;
 
     `,
     [start, end, limit]

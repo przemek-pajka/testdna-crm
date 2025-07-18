@@ -14,21 +14,16 @@ const Bar = dynamic(() => import("react-chartjs-2").then((m) => m.Bar), {
 });
 
 /**
- * MiniBar – wykres słupkowy z DWIEMA seriami: zamówienia + wizyty
- *
- * Props
- * ─────────────────────────────────────────────────────────────
- *  orders        – tablica liczb „Zamówienia”  (wymagane)
- *  visits        – tablica liczb „Umówienia”   (wymagane)
- *  ordersColor   – kolor słupków zamówień      (default #5c6dff)
- *  visitsColor   – kolor słupków wizyt         (default #26a69a)
- *  labels        – etykiety osi X (default "Pn–Nd")
- *  width / height – rozmiar canvasa
- *  stacked       – czy serię rysować „stacked” (default false)
+ * MiniBar
+ * ──────────────────────────────────────────────────────────
+ *  orders        – tablica liczb (wymagana)
+ *  visits        – tablica liczb (opcjonalna → brak drugiej serii)
+ *  …pozostałe propsy bez zmian…
  */
 export default function MiniBar({
   orders,
   visits,
+  optionsOverride,
   ordersColor = "#5c6dff",
   visitsColor = "#26a69a",
   labels,
@@ -36,33 +31,36 @@ export default function MiniBar({
   height = 100,
   stacked = false,
 }) {
+  /* ── Et ykiety X ────────────────────────────── */
   const defaultLabels = ["Pn", "Wt", "Śr", "Czw", "Pt", "Sb", "Nd"];
-  const xLabels = (labels ?? defaultLabels).slice(
-    0,
-    Math.max(orders?.length ?? 0, visits?.length ?? 0)
-  );
+  const maxLen = Math.max(orders?.length ?? 0, visits?.length ?? 0);
+  const xLabels = (labels ?? defaultLabels).slice(0, maxLen);
 
-  const chartData = {
-    labels: xLabels,
-    datasets: [
-      {
-        label: "Zamówienia",
-        data: orders,
-        backgroundColor: ordersColor,
-        barPercentage: 0.48,
-        categoryPercentage: 1.0,
-        borderRadius: 4,
-      },
-      {
-        label: "Umówienia",
-        data: visits,
-        backgroundColor: visitsColor,
-        barPercentage: 0.48,
-        categoryPercentage: 1.0,
-        borderRadius: 4,
-      },
-    ],
-  };
+  /* ── Budujemy datasets dynamicznie ───────────── */
+  const datasets = [
+    {
+      label: "Zamówienia",
+      data: orders,
+      backgroundColor: ordersColor,
+      barPercentage: 0.48,
+      categoryPercentage: 1.0,
+      borderRadius: 4,
+    },
+  ];
+
+  /* jeśli przekazano visits i są > 0 – dodaj drugą serię */
+  if (Array.isArray(visits) && visits.some((v) => v > 0)) {
+    datasets.push({
+      label: "Umówienia",
+      data: visits,
+      backgroundColor: visitsColor,
+      barPercentage: 0.48,
+      categoryPercentage: 1.0,
+      borderRadius: 4,
+    });
+  }
+
+  const chartData = { labels: xLabels, datasets };
 
   const options = {
     responsive: false,
@@ -73,15 +71,12 @@ export default function MiniBar({
       tooltip: { mode: "index", intersect: false },
     },
     scales: {
-      x: {
-        stacked,
-        offset: true,
-        grid: { display: false },
-        ticks: { font: { size: 10 }, padding: 4, maxRotation: 0 },
-      },
-      y: { display: false, stacked, grid: { display: false } },
+      x: { stacked, offset: true, grid: { display: false } },
+      y: { display: false, stacked, grid: { display: false } }
     },
+    ...optionsOverride
   };
 
+ 
   return <Bar data={chartData} options={options} width={width} height={height} />;
 }

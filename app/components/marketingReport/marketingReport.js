@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Card } from "../card/card";
 import MiniBar from "../miniBar/miniBar"; // wersja z propsami {orders, visits,...}
@@ -21,10 +21,11 @@ const Pie = dynamic(() => import("react-chartjs-2").then((m) => m.Pie), {
  *  • tabela ostatnich zamówień (demo/mocks)
  */
 export default function MarketingReport({ classes = "" }) {
+  const today = new Date().toISOString().slice(0, 10); // dzisiejsza data w formacie YYYY-MM-DD
   /* Zakres dat – ustaw dowolne wartości start/end */
   const [dateRange, setDateRange] = useState({
-    start: "2025-06-01",
-    end: "2025-06-12",
+    start: "2025-07-01",
+    end: "2025-07-06",
   });
 
   /* Statystyki z API */
@@ -97,6 +98,25 @@ export default function MarketingReport({ classes = "" }) {
     fetchOrders();
   }, [dateRange]);
 
+  /* 1️⃣  Dynamika etykiet + danych  ────────────────────────────── */
+const { barLabels, barData } = useMemo(() => {
+  const map = {};                      // {etykieta: suma_qty}
+
+  orders.forEach((o) => {
+    const key = o.product?.trim();     // pełna nazwa produktu
+    if (!key) return;
+    const qty = Number(o.qty ?? 1);    // zawsze liczba
+    map[key] = (map[key] ?? 0) + qty;
+  });
+
+  const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+  return {
+    barLabels: entries.map(([label]) => label),
+    barData:   entries.map(([_, qty]) => qty),
+  };
+}, [orders]);
+
+
   /* Handlery pól daty */
   const handleDateChange = (key) => (e) =>
     setDateRange((prev) => ({ ...prev, [key]: e.target.value }));
@@ -138,6 +158,8 @@ export default function MarketingReport({ classes = "" }) {
       ? `${Math.round(stats.suma_pln / stats.zamowienia)} zł`
       : "—";
 
+
+      
   return (
     <Card classes={classes}>
       {/* ── Nagłówek ─────────────────────────────────────────────── */}
@@ -193,11 +215,18 @@ export default function MarketingReport({ classes = "" }) {
           <h3 className="mb-2 font-medium text-sm">Rozkład wg typu badania</h3>
           {/* Demo: jedna seria (zamówienia) → visits = same zera */}
           <MiniBar
-            orders={typeData}
+            orders={barData}  
             visits={emptyVisits}
-            labels={typeLabels}
+            labels={barLabels}  
             width={320}
             height={270}
+              optionsOverride={{
+              scales: {
+                x: {
+                  ticks: { display: false },   // ⬅︎ brak napisów osi X
+                },
+              },
+            }}
             ordersColor="#5c6dff"
             visitsColor="rgba(0,0,0,0)" // ukryj zieloną serię
           />
@@ -209,22 +238,24 @@ export default function MarketingReport({ classes = "" }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b">
-              <th className="py-2 text-left">Numer zamówienia</th>
-              <th className="py-2 text-left">Produkt</th>
-              <th className="py-2 text-left">Liczba sztuk</th>
-              <th className="py-2 text-left">Kwota zamówienia</th>
-              <th className="py-2 text-left">Źródło</th>
+              <th className="py-2 px-5 text-left">Serwis</th>
+              <th className="py-2 px-5 text-left">Numer zamówienia</th>
+              <th className="py-2 px-5 text-left">Produkt</th>
+              <th className="py-2 px-5 text-left">Liczba sztuk</th>
+              <th className="py-2 px-5 text-left">Kwota zamówienia</th>
+              <th className="py-2 px-5 text-left">Źródło</th>
             </tr>
           </thead>
           <tbody>
             {console.log(orders)}
             {orders.map((r) => (
               <tr key={r.id} className="border-b last:border-0">
-                <td className="py-2">{r.id}</td>
-                <td>{r.product}</td>
-                <td>{r.qty}</td>
-                <td>{r.amount}</td>
-                <td>{r.source}</td>
+                <td className="py-2 px-5" style={{color:'#2ab159', fontWeight:'700'}}>testdna.pl</td>
+                <td className="px-5" style={{ fontWeight:'700'}}>{r.id}</td>
+                <td className="px-5" style={{maxWidth: '400px'}}>{r.product}</td>
+                <td className="px-5">{r.qty}</td>
+                <td className="px-5">{r.amount}</td>
+                <td className="px-5">{r.source}</td>
               </tr>
             ))}
           </tbody>
