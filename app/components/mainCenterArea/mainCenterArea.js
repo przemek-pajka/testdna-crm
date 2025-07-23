@@ -84,7 +84,7 @@ return(
 
         <div className="stats-col text-sm mt-5">
             <div className="flex items-center"><span className="circ circ-orders"></span>Zamówienia: { lastWeekOrders.reduce((sum, val) => sum + val, 0)} </div>
-            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: { lastWeekVisits.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 14.07)</div>
+            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: { lastWeekVisits.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 21.07)</div>
         </div>
         </Card>
 
@@ -103,7 +103,7 @@ return(
 
         <div className="stats-col text-sm mt-5">
             <div className="flex items-center"><span className="circ circ-orders"></span>Zamówienia: { thisWeekOrders.reduce((sum, val) => sum + val, 0)} </div>
-            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: {thisWeekVisits.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 14.07)</div>
+            <div className="flex items-center" style={{maxWidth: 393.16}}><span className="circ circ-appointments"></span>Umówienia formularze: {thisWeekVisits.reduce((sum, val) => sum + val, 0)} (Rzeczywista wartość - DANE W BAZIE DO PONIEDZIALKU 21.07)</div>
         </div>
         </Card>
 

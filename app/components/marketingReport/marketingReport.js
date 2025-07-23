@@ -217,7 +217,7 @@ const { barLabels, barData } = useMemo(() => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         {/* Pie */}
         <div className="aspect-square relative h-80 p-4 border border-gray-200 rounded-md">
-          <h3 className="mb-2 font-medium text-sm">Rozkład wg portalu</h3>
+          <h3 className="mb-2 font-medium text-sm">Rozkład wg portalu - przykładowe dane</h3>
           <Pie data={portalData} options={pieOptions} height={230} />
         </div>
 
@@ -262,7 +262,7 @@ const { barLabels, barData } = useMemo(() => {
             {orders.map((r) => (
               <tr key={r.id} className="border-b last:border-0">
                 <td className="py-2 px-5" style={{color:'#2ab159', fontWeight:'700'}}>testdna.pl</td>
-                <td className="px-5" style={{ fontWeight:'700'}}>{r.id}</td>
+                <td className="px-5" style={{ fontWeight:'700'}}>{r.order_id}</td>
                 <td className="px-5" style={{maxWidth: '400px'}}>{r.product}</td>
                 <td className="px-5">{r.qty}</td>
                 <td className="px-5">{r.amount}</td>
